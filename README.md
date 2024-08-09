@@ -6,7 +6,8 @@
 
 - check php version
   `$ php -v`
-  ```
+
+```
    PHP 8.2.20 (cli) (built: Jun 17 2024 13:33:14) (NTS)
    Copyright (c) The PHP Group
    Zend Engine v4.2.20, Copyright (c) Zend Technologies
@@ -18,12 +19,13 @@
 
 - Change the following settings per your requirements:
 
-```
+
    max_execution_time = 300
    memory_limit = 512M 
    post_max_size = 128M 
    upload_max_filesize = 128M
-```
+
+
 
 - To implement the changes, restart the php-fpm service
 
@@ -55,32 +57,31 @@
 - From outside psql shell
 
   - Create first the user for the database.
-      nextclouddb
+      
        - first add postgres in sudoers group
        `  $ usermod -aG sudo postgres`
 
  `$ sudo -u postgres psql -c "CREATE USER nextcloud_user PASSWORD 'nextcloud_pw';"`
 
 - And now create the database.
-
-`$ sudo -u postgres psql -c "CREATE DATABASE nextcloud_db WITH OWNER nextcloud_user ENCODING=UTF8;"`
+ 
+ `$ sudo -u postgres psql -c "CREATE DATABASE nextcloud_db WITH OWNER nextcloud_user ENCODING=UTF8;"`
 
 - Check if we now can connect to the database server and the database in detail (you will get a question about the password for the database user!). If this is not working it makes no sense to proceed further! We need to fix first the access then!
 
 `$ psql -h localhost -U nextcloud -d nextcloud_db`
 
-               or: 
     
-`$ psql -U nextcloud_user -d nextcloud_db -h 127.0.0.1 -W`
+     `$ psql -U nextcloud_user -d nextcloud_db -h 127.0.0.1 -W`
 
  - Come out from data base using \q
 
 ####  Download and Install Nextcloud
 
 - Use the following command to download the latest version of Nextcloud:
-   `$ wget  https://download.nextcloud.com/server/releases/latest.zip `
+    `$ wget  https://download.nextcloud.com/server/releases/latest.zip `
 
- - Extract file into the folder /var/www/ with the following command:
+- Extract file into the folder /var/www/ with the following command:
     `$ sudo unzip latest.zip -d /var/www/`
 
 
