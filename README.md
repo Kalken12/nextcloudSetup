@@ -12,3 +12,16 @@
    Zend Engine v4.2.20, Copyright (c) Zend Technologies
    with Zend OPcache v8.2.20, Copyright (c), by Zend Technologies
 ```
+
+ - After installing all the packages, edit the php.ini file:
+   ` $ sudo vi /etc/php/8.2/fpm/php.ini`
+
+- Change the following settings per your requirements:
+```
+max_execution_time = 300
+memory_limit = 512M 
+post_max_size = 128M 
+upload_max_filesize = 128M
+```
+
+- To implement the changes, restart the php-fpm service
