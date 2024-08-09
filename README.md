@@ -79,10 +79,143 @@
 ####  Download and Install Nextcloud
 
 - Use the following command to download the latest version of Nextcloud:
+
     `$ wget  https://download.nextcloud.com/server/releases/latest.zip `
 
 - Extract file into the folder /var/www/ with the following command:
-    `$ sudo unzip latest.zip -d /var/www/`
 
+   `$ sudo unzip latest.zip -d /var/www/`
 
+- Change ownership of the /var/www/nextcloud directory to www-data.
+
+`$ sudo chown -R www-data:www-data /var/www/nextcloud`
+#### Configure Nginx for Nextcloud with self signed certified
+
+ -Generate the private key and certificate:
+  
+  `  $ sudo openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout nextcloud.key -out nextcloud.crt`
+ 
+    `$ sudo cp nextcloud.crt /etc/ssl/certs/ cp nextcloud.key /etc/ssl/private/`
+ 
+  - Change nginx configuration
     
+     `$ sudo vi /etc/nginx/sites-available/nextcloud.conf`
+
+ `$ sudo vi /etc/nginx/sites-available/nextcloud.conf`
+ 
+ - Add snippet inside file  and save it
+
+```
+upstream php-handler {
+    server unix:/run/php/php8.2-fpm.sock;  # Adjust based on your PHP version
+    # server 127.0.0.1:9000;  # Use if PHP-FPM is listening on a TCP port
+}
+server {
+    listen 80;
+    server_name nextcloud.local;
+    # Enforce HTTPS
+    return 301 https://$server_name$request_uri;
+}
+server {
+    listen 443 ssl;
+    server_name nextcloud.local;
+    ssl_certificate /etc/ssl/certs/nextcloud.crt;
+    ssl_certificate_key /etc/ssl/private/nextcloud.key;
+    # Add headers to serve security-related headers
+    add_header X-Content-Type-Options nosniff;
+    add_header X-XSS-Protection "1; mode=block";
+    add_header X-Robots-Tag none;
+    add_header X-Download-Options noopen;
+    add_header X-Permitted-Cross-Domain-Policies none;
+    add_header Referrer-Policy no-referrer;
+    # Path to the root of your installation
+    root /var/www/nextcloud;
+    index index.php index.html;
+    location = /robots.txt {
+        allow all;
+        log_not_found off;
+        access_log off;
+    }
+    # The following 2 rules are only needed for the user_webfinger app.
+    # Uncomment it if you're planning to use this app.
+    #rewrite ^/.well-known/host-meta /public.php?service=host-meta last;
+    #rewrite ^/.well-known/host-meta.json /public.php?service=host-meta-json last;
+    location = /.well-known/carddav {
+        return 301 $scheme://$host/remote.php/dav;
+    }
+    location = /.well-known/caldav {
+        return 301 $scheme://$host/remote.php/dav;
+    }
+    location /.well-known/acme-challenge { }
+    location ^~ / {
+        # set max upload size
+        client_max_body_size 512M;
+        fastcgi_buffers 64 4K;
+        # Enable gzip but do not remove ETag headers
+        gzip on;
+        gzip_vary on;
+        gzip_comp_level 4;
+        gzip_min_length 256;
+        gzip_proxied expired no-cache no-store private no_last_modified no_etag auth;
+        gzip_types application/atom+xml application/javascript application/json application/ld+json application/manifest+json application/rss+xml application/vnd.geo+json application/vnd.ms-fontobject application/x-font-ttf application/x-web-app-manifest+json application/xhtml+xml application/xml font/otf font/ttf image/bmp image/svg+xml image/x-icon text/cache-manifest text/css text/plain text/vcard text/vnd.rim.location.xloc text/vtt text/x-component text/x-cross-domain-policy;
+        location / {
+            rewrite ^ /index.php;
+        }
+        location ~ ^\/(?:build|tests|config|lib|3rdparty|templates|data)\/ {
+            deny all;
+        }
+        location ~ ^\/(?:\.|autotest|occ|issue|indie|db_|console) {
+            deny all;
+        }
+        location ~ \.php(?:$|/) {
+            fastcgi_split_path_info ^(.+?\.php)(/.*)$;
+            set $path_info $fastcgi_path_info;
+            try_files $fastcgi_script_name =404;
+            include fastcgi_params;
+            fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+            fastcgi_param PATH_INFO $path_info;
+            fastcgi_param HTTPS on;
+            fastcgi_param modHeadersAvailable true; #Avoid sending the security headers twice
+            fastcgi_pass php-handler;
+            fastcgi_intercept_errors on;
+            fastcgi_request_buffering off;
+        }
+        location ~ ^\/(?:updater|ocs-provider)\/ {
+            try_files $uri/ =404;
+            index index.php;
+        }
+        location ~* \.(?:css|js|woff|svg|gif)$ {
+            try_files $uri /index.php$uri$is_args$args;
+            access_log off;
+            expires 30d;
+            add_header Cache-Control "public, max-age=15778463";
+        }
+        location ~* \.(?:png|html|ttf|ico|jpg|jpeg)$ {
+            try_files $uri /index.php$uri$is_args$args;
+            access_log off;
+            expires 30d;
+            add_header Cache-Control "public, max-age=15778463";
+        }
+    }
+}
+```
+  - Symlink  site available to site enabled
+    `$ ln -s /etc/nginx/sites-available/nextcloud.conf /etc/nginx/sites-enabled/`
+  -  Restart Services:
+    ` $ sudo systemctl start nginx`
+  - Test nginx using, if all things fine with syntax go further
+     `$ sudo nginx -t`
+ -  Restart nginx and access on browser through server name
+
+```
+    Database user: nextclouduser
+    Database password: The password you set for nextclouduser (1234)
+    Database name: nextclouddb
+    Database host: localhost (or your PostgreSQL server address)
+     
+```
+- Sample Commands for File Permissions
+
+`$ chown -R www-data:www-data /var/www/nextcloud/`
+`$ find /var/www/nextcloud/ -type f -print0 | sudo xargs -0 chmod 0640`
+`$ find /var/www/nextcloud/ -type d -print0 | sudo xargs -0 chmod 0750`
