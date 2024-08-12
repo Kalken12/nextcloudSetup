@@ -253,4 +253,41 @@ server {
 
      `sudo touch /var/nextcloud_data/.ocdata`
      `sudo chown -R www-data:www-data /path/to/your/data`
-   
+
+
+
+## If you forget admin password of nextcloud how to get it back using postgres database. 
+ 1. Log in to your server:
+      - SSH into the server where your PostgreSQL database is hosted.
+ 2. Switch to the PostgreSQL user:
+    - `$ sudo -i -u postgres`
+ 3. Access the PostgreSQL command line
+    - `psql`
+ 4. List the databases:(If you're unsure which database is being used by Nextcloud, you can list all the databases)
+    - `\l`
+ 5. Connect to the Nextcloud database:
+     - Connect to the specific database that Nextcloud is using.
+     - `\c nextcloud_db`
+ 6. Reset the password for the Nextcloud database user:
+     - `ALTER USER nextcloud_user WITH PASSWORD 'new_password';`
+ 7. Exit the PostgreSQL command line:
+    - `\q`
+
+ 8. Verify Database Configuration
+    - Check the database connection details in the config.php file to ensure they are correct
+     ` sudo vi /var/www/nextcloud/config/config.php`
+    - Replace nextcloud_db, nextcloud_user, and your_password with your actual database name, user, and password.
+      ```
+      'dbtype' => 'pgsql',
+      'dbname' => 'nextcloud_db',
+      'dbuser' => 'nextcloud_user',
+      'dbpassword' => 'your_password',
+      'dbhost' => 'localhost',
+      'dbport' => '',
+
+      ```
+
+
+ 
+       
+
