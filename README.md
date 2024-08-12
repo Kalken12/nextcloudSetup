@@ -1,4 +1,4 @@
-# nextcloudSetup
+# NextcloudSetup
 
 ## Nextcloud installation 
 ####  Install PHP and PHP extensions for Nextcloud
@@ -201,10 +201,7 @@ server {
 ```
   - Symlink  site available to site enabled
     `$ ln -s /etc/nginx/sites-available/nextcloud.conf /etc/nginx/sites-enabled/`
-  -  Restart Services:
-    ` $ sudo systemctl start nginx`
-  - Test nginx using, if all things fine with syntax go further
-     `$ sudo nginx -t`
+
  -  Restart nginx and access on browser through server name
 
 ```
@@ -216,6 +213,44 @@ server {
 ```
 - Sample Commands for File Permissions
 
-`$ chown -R www-data:www-data /var/www/nextcloud/`
-`$ find /var/www/nextcloud/ -type f -print0 | sudo xargs -0 chmod 0640`
-`$ find /var/www/nextcloud/ -type d -print0 | sudo xargs -0 chmod 0750`
+
+
+-  Move the data directory outside the web server document root and change it's permission
+  
+ `$ sudo mv /var/www/html/nextcloud/data /var/nextcloud_data`
+ 
+ `$ sudo chown -R www-data:www-data /var/nextcloud_data`
+
+ `$ chown -R www-data:www-data /var/www/nextcloud/`
+
+-  Update Nextcloud Configuration:
+ 
+  1. Open the config/config.php file of your Nextcloud installation.
+
+     `vi /var/www/nextcloud/config/config.php`
+
+  3. Update the 'datadirectory' parameter to point to the new location of your data directory.
+   
+     ```  'datadirectory' => '/var/nextcloud_data' ```
+
+ 
+-  Restart Services:
+
+  ` $ sudo systemctl start nginx`
+ 
+  - Test nginx using, if all things fine with syntax go further
+     `$ sudo nginx -t`
+
+
+- Now nextcloud is ready to use, access it from browser
+
+  
+### Error might occur
+
+1. .ocdata is not found inside data directory
+    
+    - Create file using touch and give necessary permission
+
+     `sudo touch /var/nextcloud_data/.ocdata`
+     `sudo chown -R www-data:www-data /path/to/your/data`
+   
