@@ -287,7 +287,8 @@ server {
 
       ```
 
-
+9. Restart nginx and access through browser.
+   
  
        
 
