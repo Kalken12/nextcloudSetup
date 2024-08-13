@@ -1,10 +1,13 @@
 # NextcloudSetup
 
 ## Nextcloud installation 
+
 ####  Install PHP and PHP extensions for Nextcloud
+
 `$ sudo apt install php php-cli php-fpm php-json php-common php-mysql php-zip php-gd php-intl php-curl php-xml php-mbstring php-bcmath php-gmp`
 
 - check php version
+
   `$ php -v`
 
 ```
@@ -15,7 +18,7 @@
 ```
 
  - After installing all the packages, edit the php.ini file:
-   ` $ sudo vi /etc/php/8.2/fpm/php.ini`
+   `$ sudo vi /etc/php/8.2/fpm/php.ini`
 
 - Change the following settings per your requirements:
 
@@ -37,10 +40,12 @@
 - check version after installation first switch current user to postgres
   `sudo -i -u postgres`
   `$ psql -version`
-- out put will be:
-  `psql (PostgreSQL) 16.3 (Debian 16.3-1.pgdg120+1)`
 
-  ## Create a PostgreSQL Database and User:
+- out put will be:
+
+   `psql (PostgreSQL) 16.3 (Debian 16.3-1.pgdg120+1)`
+
+## Create a PostgreSQL Database and User:
 - From inside psql shell
     1.Create a new user:
 
@@ -59,17 +64,18 @@
   - Create first the user for the database.
       
        - first add postgres in sudoers group
-       `  $ usermod -aG sudo postgres`
 
- `$ sudo -u postgres psql -c "CREATE USER nextcloud_user PASSWORD 'nextcloud_pw';"`
+    `$ usermod -aG sudo postgres`
+
+    `$ sudo -u postgres psql -c "CREATE USER nextcloud_user PASSWORD 'nextcloud_pw';"`
 
 - And now create the database.
  
- `$ sudo -u postgres psql -c "CREATE DATABASE nextcloud_db WITH OWNER nextcloud_user ENCODING=UTF8;"`
+     `$ sudo -u postgres psql -c "CREATE DATABASE nextcloud_db WITH OWNER nextcloud_user ENCODING=UTF8;"`
 
 - Check if we now can connect to the database server and the database in detail (you will get a question about the password for the database user!). If this is not working it makes no sense to proceed further! We need to fix first the access then!
 
-`$ psql -h localhost -U nextcloud -d nextcloud_db`
+     `$ psql -h localhost -U nextcloud -d nextcloud_db`
 
     
      `$ psql -U nextcloud_user -d nextcloud_db -h 127.0.0.1 -W`
@@ -84,18 +90,19 @@
 
 - Extract file into the folder /var/www/ with the following command:
 
-   `$ sudo unzip latest.zip -d /var/www/`
+    `$ sudo unzip latest.zip -d /var/www/`
 
 - Change ownership of the /var/www/nextcloud directory to www-data.
 
 `$ sudo chown -R www-data:www-data /var/www/nextcloud`
+
 #### Configure Nginx for Nextcloud with self signed certified
 
  -Generate the private key and certificate:
   
-  `  $ sudo openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout nextcloud.key -out nextcloud.crt`
+  `$ sudo openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout nextcloud.key -out nextcloud.crt`
  
-    `$ sudo cp nextcloud.crt /etc/ssl/certs/ cp nextcloud.key /etc/ssl/private/`
+  `$ sudo cp nextcloud.crt /etc/ssl/certs/ cp nextcloud.key /etc/ssl/private/`
  
   - Change nginx configuration
     
@@ -200,6 +207,7 @@ server {
 }
 ```
   - Symlink  site available to site enabled
+
     `$ ln -s /etc/nginx/sites-available/nextcloud.conf /etc/nginx/sites-enabled/`
 
  -  Restart nginx and access on browser through server name
@@ -217,17 +225,17 @@ server {
 
 -  Move the data directory outside the web server document root and change it's permission
   
- `$ sudo mv /var/www/html/nextcloud/data /var/nextcloud_data`
+    `$ sudo mv /var/www/html/nextcloud/data /var/nextcloud_data`
  
- `$ sudo chown -R www-data:www-data /var/nextcloud_data`
+    `$ sudo chown -R www-data:www-data /var/nextcloud_data`
 
- `$ chown -R www-data:www-data /var/www/nextcloud/`
+    `$ chown -R www-data:www-data /var/www/nextcloud/`
 
 -  Update Nextcloud Configuration:
  
   1. Open the config/config.php file of your Nextcloud installation.
 
-     `vi /var/www/nextcloud/config/config.php`
+      `$ vi /var/www/nextcloud/config/config.php`
 
   3. Update the 'datadirectory' parameter to point to the new location of your data directory.
    
@@ -236,10 +244,11 @@ server {
  
 -  Restart Services:
 
-  ` $ sudo systemctl start nginx`
+      `$ sudo systemctl start nginx`
  
   - Test nginx using, if all things fine with syntax go further
-     `$ sudo nginx -t`
+
+      `$ sudo nginx -t`
 
 
 - Now nextcloud is ready to use, access it from browser
@@ -251,31 +260,41 @@ server {
     
     - Create file using touch and give necessary permission
 
-     `sudo touch /var/nextcloud_data/.ocdata`
-     `sudo chown -R www-data:www-data /path/to/your/data`
+         `sudo touch /var/nextcloud_data/.ocdata`
+      
+         `sudo chown -R www-data:www-data /path/to/your/data`
 
 
 
 ## If you forget admin password of nextcloud how to get it back using postgres database. 
+ 
  1. Log in to your server:
-      - SSH into the server where your PostgreSQL database is hosted.
+    - SSH into the server where your PostgreSQL database is hosted.
+
  2. Switch to the PostgreSQL user:
     - `$ sudo -i -u postgres`
+ 
  3. Access the PostgreSQL command line
     - `psql`
+
  4. List the databases:(If you're unsure which database is being used by Nextcloud, you can list all the databases)
     - `\l`
+ 
  5. Connect to the Nextcloud database:
      - Connect to the specific database that Nextcloud is using.
      - `\c nextclouddb`
+
  6. Reset the password for the Nextcloud database user:
      - `ALTER USER nextcloud_user WITH PASSWORD 'new_password';`
+
  7. Exit the PostgreSQL command line:
-    - `\q`
+     - `\q`
 
  8. Verify Database Configuration
+
     - Check the database connection details in the config.php file to ensure they are correct
-     ` sudo vi /var/www/nextcloud/config/config.php`
+       `sudo vi /var/www/nextcloud/config/config.php`
+
     - Replace nextcloud_db, nextcloud_user, and your_password with your actual database name, user, and password.
       ```
       'dbtype' => 'pgsql',
@@ -287,8 +306,4 @@ server {
 
       ```
 
-9. Restart nginx and access through browser.
-   
- 
-       
-
+10. Restart nginx and access through browser.
