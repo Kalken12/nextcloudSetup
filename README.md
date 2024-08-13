@@ -19,13 +19,13 @@
 
 - Change the following settings per your requirements:
 
-
+```
    max_execution_time = 300
    memory_limit = 512M 
    post_max_size = 128M 
    upload_max_filesize = 128M
 
-
+```
 
 - To implement the changes, restart the php-fpm service
 
@@ -267,7 +267,7 @@ server {
     - `\l`
  5. Connect to the Nextcloud database:
      - Connect to the specific database that Nextcloud is using.
-     - `\c nextcloud_db`
+     - `\c nextclouddb`
  6. Reset the password for the Nextcloud database user:
      - `ALTER USER nextcloud_user WITH PASSWORD 'new_password';`
  7. Exit the PostgreSQL command line:
