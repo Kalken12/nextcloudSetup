@@ -4,7 +4,7 @@
 
 ####  Install PHP and PHP extensions for Nextcloud
 
-`$ sudo apt install php php-cli php-fpm php-json php-common php-mysql php-zip php-gd php-intl php-curl php-xml php-mbstring php-bcmath php-gmp`
+`$ sudo apt install php php-cli php-fpm php-json php-common php-zip php-gd php-intl php-curl php-xml php-mbstring php-bcmath php-gmp`
 
 - check php version
 
